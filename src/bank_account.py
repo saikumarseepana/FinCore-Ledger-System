@@ -6,6 +6,9 @@ logger = logging.getLogger(__name__)
 
 class BankAccount:
     def __init__(self, balance):
+        if balance < 0:
+            logger.error(f"Failed Account Creation: Negative initial balance {balance}")
+            raise ValueError("Initial balance cannot be Negative")
         self.__balance = balance
         logger.info(f"Account created with balance: {balance}")
 
