@@ -1,5 +1,8 @@
 # Byte-compiled / optimized / DLL files
+data/*.json
+logs/
 __pycache__/
+.pytest_cache/
 *.py[codz]
 *$py.class
 
