@@ -1,6 +1,6 @@
 import logging
 from src.file_handler import FileHandler
-# from datetime import datetime
+from datetime import datetime
 # import uuid
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,8 @@ class BankAccount:
 
         #Balance
         if self.transactions:
-            self.__balance = 0.0 # This will rest the balance as transactions exist so we ignore the initial balance here otherwise it will be a bug
-            self._recalculate_balance()
+            self.__balance = self.transactions[-1]['balance']
+            # self._recalculate_balance(). # Recalculating balance from transactions to ensure accuracy, in case of any manual file edits or discrepancies.
             logger.info(f"Account loaded with existing transactions, balance recalculated to: {self.__balance}")
         else:
             self.__balance = balance
@@ -30,12 +30,8 @@ class BankAccount:
             raise ValueError("Deposit amount must be Positive")
         self.__balance += amount
 
-        self.transactions.append({
-            'type': 'deposit',
-            'amount': amount
-        })
         logger.info(f"Deposited {amount}, new balance: {self.__balance}")
-        self._save_transaction()
+        self._record_transaction('Deposit', amount)
 
         return self.__balance
     
@@ -48,27 +44,41 @@ class BankAccount:
             raise ValueError("Insufficient Funds")
         self.__balance -= amount
 
-        self.transactions.append({
-            'type': 'withdraw',
-            'amount': amount
-        })
-
         logger.info(f"Withdrew {amount}, new balance: {self.__balance}")
-        self._save_transaction()
+        self._record_transaction('Withdraw', amount)
         return self.__balance
     
     def get_balance(self):
         logger.info(f"Balance Checked: {self.__balance}")
         return self.__balance
     
-    def _recalculate_balance(self):
-        """ Recalculates balance from transaction history."""
-        for transaction in self.transactions:
-            if transaction['type'] == 'deposit':
-                self.__balance += transaction['amount']
-            elif transaction['type'] == 'withdraw':
-                self.__balance -= transaction['amount']
-
-    def _save_transaction(self):
-        """ Saves current transaction to file."""
+    def _record_transaction(self, type, amount):
+        """ Records and saves the transaction to file."""
+        transaction = {
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "type": type,
+            "amount": amount,
+            "balance": self.__balance
+        }
+        self.transactions.append(transaction)
         self.file_handler.save_data(self.transactions)
+
+    def print_statement(self):
+        """ Prints the transaction history in a readable format."""
+        print(f"\n{'DATE':<20} | {'TYPE':<10} | {'AMOUNT':<10} | {'BALANCE':<10}")
+        print("-" * 60)
+
+        for transaction in self.transactions:
+            print(f"{transaction['date']:<20} | {transaction['type']:<10} | {transaction['amount']:<10.2f} | {transaction['balance']:<10.2f}")
+    
+    # def _recalculate_balance(self):
+    #     """ Recalculates balance from transaction history."""
+    #     for transaction in self.transactions:
+    #         if transaction['type'] == 'deposit':
+    #             self.__balance += transaction['amount']
+    #         elif transaction['type'] == 'withdraw':
+    #             self.__balance -= transaction['amount']
+
+    # def _save_transaction(self):
+    #     """ Saves current transaction to file."""
+    #     self.file_handler.save_data(self.transactions)
