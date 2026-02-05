@@ -37,9 +37,10 @@ def main():
         print(f"\n Current Balance: {account.get_balance()}")
         print("1. Deposit")
         print("2. Withdraw")
-        print("3. Exit")
+        print("3. Print Statement")
+        print("4. Exit")
 
-        choice = input("Select an option (1 - 3): ")
+        choice = input("Select an option (1 - 4): ")
 
         try:
             if choice == '1':
@@ -52,7 +53,10 @@ def main():
                 account.withdraw(amount)
                 print(f"Withdrew: {amount}")
 
-            elif choice == "3":
+            elif choice == '3':
+                account.print_statement()
+
+            elif choice == "4":
                 print("Saving data... Goodbye!")
                 break
             else:
