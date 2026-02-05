@@ -7,14 +7,22 @@ A production-grade banking backend implementing robust OOP principles, transacti
 * **Robust Validation:** Prevents negative deposits and overdrafts with custom error handling.
 * **Audit Logging:** Replaces standard `print` statements with Python's `logging` module to create a permanent, timestamped audit trail of all transactions in `logs/banking.log`.
 * **Data Persistence:** Automated JSON file handling ensures account balances and transaction history survive program restarts.
+
+
 * **Interactive CLI:** A user-friendly terminal interface for depositing, withdrawing, and checking balances in real-time.
+* **Transaction Ledger:** View a professional, formatted bank statement with a complete history of all deposits and withdrawals.
 
 ## 🛠️ How to Run
 **1. Start the Application:**
 ```bash
    python main.py
 ```
-**2. Interact: Follow the on-screen menu to manage your account. Data is automatically saved to data/transactions.json upon every transaction.**
+**2. Interact:** 
+Select Option 1 & 2 to Deposit or Withdraw.
+
+Select Option 3 to print your full Transaction History.
+
+Data is automatically saved to data/transactions.json
 
 ## 🧪 Running Tests
 This project uses `pytest` for unit testing to ensure reliability.
