@@ -17,20 +17,24 @@ logging.basicConfig(
 
 print(f"System Initialized. Logs are writing to: {log_file}")
 
-# try:
-#     alice = BankAccount(1000)
-#     alice.deposit(3000)
-#     print(f"Alice's balance: {alice.get_balance()}")
-
-#     alice.withdraw(5000) # We'll test the error
-
-# except ValueError as e:                                ## Hard coded test
-#     print(f"Error: {e}")
 
 def main():
-    print("---  FinCore Ledger System  ---")
+    print("\n=== 🏦 FinCore Ledger System (Multi-User) ===")
 
-    account = BankAccount(balance=0)
+    # Taking username as input
+    username = input("Enter your username to login: ").strip()
+
+    if not username:
+        print("Username cannot be empty.")
+        return
+    
+    try:
+        # Intitializing the account for this user
+        account = BankAccount(username=username)
+        print(f"Login Successful. Welcome, {username}!")
+    except ValueError as e:
+        print(f"Error loading account: {e}")
+        return
 
     while True:
 
