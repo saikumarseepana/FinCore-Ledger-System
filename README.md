@@ -7,10 +7,29 @@ A production-grade banking backend implementing robust OOP principles, transacti
 * **Robust Validation:** Prevents negative deposits and overdrafts with custom error handling.
 * **Audit Logging:** Replaces standard `print` statements with Python's `logging` module to create a permanent, timestamped audit trail of all transactions in `logs/banking.log`.
 * **Data Persistence:** Automated JSON file handling ensures account balances and transaction history survive program restarts.
-
-
+* **Multi-Tenancy:** Supports multiple users with isolated transaction logs (`data/{username}.json`).
+* **Secure Login:** Validates identity at startup to prevent data collision.
 * **Interactive CLI:** A user-friendly terminal interface for depositing, withdrawing, and checking balances in real-time.
 * **Transaction Ledger:** View a professional, formatted bank statement with a complete history of all deposits and withdrawals.
+
+## 🔐 Multi-User Support
+The system now supports multiple distinct users on the same machine.
+* **Login:** Upon startup, you will be prompted for a `username`.
+* **Data Isolation:** Each user's data is stored in a unique file (e.g., `data/alice_transactions.json`).
+* **Security:** Users cannot see or modify each other's balances.
+
+## 🔄 User Flow
+```bash
+    A Start App --> B{Existing User?}
+    B -- Yes --> C[Enter Username]
+    B -- No --> C
+    C --> D[Load data/{username}.json]
+    D --> E{File Exists?}
+    E -- Yes --> F[Load Transaction History]
+    E -- No --> G[Create New User File]
+    F --> H[Main Menu]
+    G --> H
+```
 
 ## 🛠️ How to Run
 **1. Start the Application:**
