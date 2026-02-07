@@ -12,7 +12,8 @@ log_file = os.path.join(log_folder, 'banking.log')
 logging.basicConfig(
     filename = log_file,
     level = logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers = [logging.FileHandler(log_file), logging.StreamHandler()]
 )
 
 print(f"System Initialized. Logs are writing to: {log_file}")

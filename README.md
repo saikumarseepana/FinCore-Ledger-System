@@ -19,16 +19,19 @@ The system now supports multiple distinct users on the same machine.
 * **Security:** Users cannot see or modify each other's balances.
 
 ## 🔄 User Flow
-```bash
-    A Start App --> B{Existing User?}
+```mermaid
+graph TD
+    A[Start App] --> B{Existing User?}
     B -- Yes --> C[Enter Username]
-    B -- No --> C
-    C --> D[Load data/{username}.json]
+    B -- No --> C[Enter Username]
+    C --> D[Load data/username.json]
     D --> E{File Exists?}
     E -- Yes --> F[Load Transaction History]
     E -- No --> G[Create New User File]
     F --> H[Main Menu]
     G --> H
+    H --> I[Deposit/Withdraw/Print]
+    I --> J[Save to JSON]
 ```
 
 ## 🛠️ How to Run
