@@ -11,6 +11,12 @@ A production-grade banking backend implementing robust OOP principles, transacti
 * **Secure Login:** Validates identity at startup to prevent data collision.
 * **Interactive CLI:** A user-friendly terminal interface for depositing, withdrawing, and checking balances in real-time.
 * **Transaction Ledger:** View a professional, formatted bank statement with a complete history of all deposits and withdrawals.
+### 🔐 Security & Authentication
+* **Secure Login:** Custom-built authentication system preventing unauthorized access.
+* **Password Hashing:** Uses **SHA-256** with per-user **Random Salts** (16 bytes) to defeat Rainbow Table attacks.
+* **Audit Logging:** Tracks all security events (Failed Logins, New Registrations) in `logs/banking.log`.
+* **Safe Storage:** Credentials are never stored in plain text; only hashes persist in `data/users.json`.
+B
 
 ## 🔐 Multi-User Support
 The system now supports multiple distinct users on the same machine.
@@ -21,17 +27,22 @@ The system now supports multiple distinct users on the same machine.
 ## 🔄 User Flow
 ```mermaid
 graph TD
-    A[Start App] --> B{Existing User?}
-    B -- Yes --> C[Enter Username]
-    B -- No --> C[Enter Username]
-    C --> D[Load data/username.json]
-    D --> E{File Exists?}
-    E -- Yes --> F[Load Transaction History]
-    E -- No --> G[Create New User File]
-    F --> H[Main Menu]
-    G --> H
-    H --> I[Deposit/Withdraw/Print]
-    I --> J[Save to JSON]
+    A[Start App] --> B{Auth Menu}
+    B -- 1. Login --> C[Enter Credentials]
+    B -- 2. Register --> D[Create Account]
+    
+    C --> E{Valid Credentials?}
+    E -- No --> B
+    E -- Yes --> F[Load User Data]
+    
+    D --> G[Generate Salt + Hash]
+    G --> H[Save to users.json]
+    H --> B
+    
+    F --> I[Banking Dashboard]
+    I --> J[Deposit / Withdraw / Statement]
+    J --> K[Logout]
+    K --> B
 ```
 
 ## 🛠️ How to Run
