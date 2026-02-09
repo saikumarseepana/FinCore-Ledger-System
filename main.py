@@ -1,6 +1,9 @@
 import logging
 import os
+import sys
 from src.bank_account import BankAccount
+from src.user_manager import UserManager
+
 
 # Setting up the directory for logs
 log_folder = 'logs'
@@ -9,43 +12,83 @@ os.makedirs(log_folder, exist_ok=True)
 # Configuring the log file
 log_file = os.path.join(log_folder, 'banking.log')
 
+# Handlers
+file_handler = logging.FileHandler(log_file)
+console_handler = logging.StreamHandler(sys.stdout)
+
 logging.basicConfig(
-    filename = log_file,
+    # filename = log_file,
     level = logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers = [logging.FileHandler(log_file), logging.StreamHandler()]
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers = [file_handler, console_handler]
 )
 
-print(f"System Initialized. Logs are writing to: {log_file}")
-
+# print(f"System Initialized. Logs are writing to: {log_file}")
+logger = logging.getLogger("MainApp")
+logger.info(f"System Initialized. Logs are writing to: " + log_file)
 
 def main():
-    print("\n=== 🏦 FinCore Ledger System (Multi-User) ===")
+    print("\n=== 🏦 FinCore Ledger System (Secure v1.0) ===")
 
-    # Taking username as input
-    username = input("Enter your username to login: ").strip()
+    user_manager = UserManager()
 
-    if not username:
-        print("Username cannot be empty.")
-        return
+    while True:
+        print("\n--- AUTH MENU ---")
+        print("1. Login")
+        print("2. Register New User")
+        print("3. Exit")
+
+        choice = input("Choose option: ")
+
+        if choice == '1':
+            username = input("username: ").strip()
+            password = input("password: ").strip()
+
+            success, message = user_manager.login(username, password)
+            print(message)
+
+            if success:
+                run_bank_system(username)
+
+        elif choice == '2':
+            new_user = input("Enter a Username: ").strip()
+            new_pass = input("Enter a Password: ").strip()
+
+            if not new_user or not new_pass:
+                print("❌ Error: Username/Password cannot be empty.")
+                continue
+            
+            success, message = user_manager.register_user(new_user, new_pass)
+            print(message)
+
+        elif choice == '3':
+            print("Exiting... Goodbye!")
+            break
+        else:
+            print("Invalid option. Please try again.")
+
+
+def run_bank_system(username):
+    """ Protected banking Area, only accessible after successful login."""
+    logger.info(f"Starting Bank session for {username}")
+
     
     try:
         # Intitializing the account for this user
         account = BankAccount(username=username)
-        print(f"Login Successful. Welcome, {username}!")
     except ValueError as e:
         print(f"Error loading account: {e}")
         return
 
     while True:
 
-        print(f"\n Current Balance: {account.get_balance()}")
+        print(f"\n💰 User: {username} | Balance: ${account.get_balance():.2f}")
         print("1. Deposit")
         print("2. Withdraw")
         print("3. Print Statement")
         print("4. Exit")
 
-        choice = input("Select an option (1 - 4): ")
+        choice = input("Select an option: ")
 
         try:
             if choice == '1':
@@ -62,10 +105,11 @@ def main():
                 account.print_statement()
 
             elif choice == "4":
-                print("Saving data... Goodbye!")
+                print(f"Logging out {username}...")
+                logger.info(f"Ending session for {username}")
                 break
             else:
-                print("Invalid option. Please try again.")
+                print("Invalid choice.")
         except ValueError as e:
             print(f"Error: {e}")
 
