@@ -24,6 +24,11 @@ The system now supports multiple distinct users on the same machine.
 * **Data Isolation:** Each user's data is stored in a unique file (e.g., `data/alice_transactions.json`).
 * **Security:** Users cannot see or modify each other's balances.
 
+### 💸 Banking Operations
+* **Atomic Fund Transfers:** Users can transfer money to other registered users.
+* **ACID Compliance:** Implements manual **Rollback Mechanisms**. If a transfer fails mid-operation (e.g., after deduction but before deposit), the system automatically refunds the sender to ensure data consistency.
+* **Transaction History:** All transfers are logged in both users' transaction ledgers.
+
 ## 🔄 User Flow
 ```mermaid
 graph TD
@@ -40,9 +45,27 @@ graph TD
     H --> B
     
     F --> I[Banking Dashboard]
-    I --> J[Deposit / Withdraw / Statement]
+    I --> J[Deposit / Withdraw / Transfer Funds /Statement]
     J --> K[Logout]
     K --> B
+```
+## 🔄 Transaction Flow (ACID Architecture)
+```mermaid
+graph TD
+    A[User A: Transfer Request] --> B{Valid Recipient?}
+    B -- No --> C[Error: User Not Found]
+    B -- Yes --> D{Sufficient Funds?}
+    D -- No --> E[Error: Insufficient Funds]
+    
+    D -- Yes --> F[Step 1: Withdraw from User A]
+    F --> G{Step 2: Deposit to User B}
+    
+    G -- Success --> H[Commit Transaction]
+    H --> I[Log Success]
+    
+    G -- FAIL (Crash/Network) --> J[⚠️ ROLLBACK TRIGGERED]
+    J --> K[Refund User A]
+    K --> L[Log Error & Abort]
 ```
 
 ## 🛠️ How to Run
