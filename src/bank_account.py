@@ -71,9 +71,18 @@ class BankAccount:
     def print_statement(self):
         """ Prints the transaction history in a readable format."""
         print(f"\n--- 🏦 Statement for {self.username.upper()} ---")
-        print(f"\n{'DATE':<20} | {'TYPE':<10} | {'AMOUNT':<10} | {'BALANCE':<10}")
+        print(f"\n{'DATE':<20} | {'TYPE':<20} | {'AMOUNT':<10} | {'BALANCE':<10}")
         print("-" * 60)
 
         for transaction in self.transactions:
             print(f"{transaction['date']:<20} | {transaction['type']:<10} | {transaction['amount']:<10.2f} | {transaction['balance']:<10.2f}")
-    
+
+    def receive_transfer(self, amount, sender):
+        """ This method is used to receive and send money between accounts."""
+        if amount <= 0:
+            logger.error(f"Invalid amount for transfer: {amount}")
+            raise ValueError("Transfer amount must be positive.")
+        
+        self.__balance += amount
+        self._record_transaction(f"Transfer Received from {sender}", amount)
+        logger.info(f"{self.username} received transfer of {amount} from {sender}")

@@ -5,6 +5,7 @@ from src.bank_account import BankAccount
 from src.user_manager import UserManager
 
 
+
 # Setting up the directory for logs
 log_folder = 'logs'
 os.makedirs(log_folder, exist_ok=True)
@@ -48,7 +49,7 @@ def main():
             print(message)
 
             if success:
-                run_bank_system(username)
+                run_bank_system(username, user_manager)
 
         elif choice == '2':
             new_user = input("Enter a Username: ").strip()
@@ -68,7 +69,7 @@ def main():
             print("Invalid option. Please try again.")
 
 
-def run_bank_system(username):
+def run_bank_system(username, user_manager):
     """ Protected banking Area, only accessible after successful login."""
     logger.info(f"Starting Bank session for {username}")
 
@@ -85,8 +86,9 @@ def run_bank_system(username):
         print(f"\n💰 User: {username} | Balance: ${account.get_balance():.2f}")
         print("1. Deposit")
         print("2. Withdraw")
-        print("3. Print Statement")
-        print("4. Exit")
+        print("3. Transfer Funds")
+        print("4. Print Statement")
+        print("5. Exit")
 
         choice = input("Select an option: ")
 
@@ -102,9 +104,47 @@ def run_bank_system(username):
                 print(f"Withdrew: {amount}")
 
             elif choice == '3':
+                recepient_name = input("Enter recepient username: ").strip()
+
+                if recepient_name == username: # Self transfer check
+                    print("You cannot self transfer funds")
+                    continue
+
+                if recepient_name not in user_manager.users: # Recepient existence check
+                    print("Recepient not found")
+                    continue
+
+                amount = float(input("Enter transfer amount: "))
+
+                if amount > account.get_balance(): # Insufficient funds check
+                    print("Insufficient funds for transfer")
+                    continue
+
+                print("Processing transfer...")
+
+                try:
+                    account.withdraw(amount) # withdraw from sender
+
+                    print(f"DEBUG: Withdrew ${amount} from {username}. Waiting to send...")
+
+                    # Loads the recepient's account and deposits the amount
+                    recepient_account = BankAccount(username=recepient_name)
+                    recepient_account.receive_transfer(amount, sender=username)
+
+                    print(f"✅ Success! Sent ${amount} to {recepient_name}.")
+                    logger.info(f"Transfer success: {username} -> {recepient_name} | Amount: ${amount}")
+
+                except Exception as e:
+                    print(f"Transfer failed: {e}")
+                    print("Rolling back transaction...")
+
+                    account.deposit(amount) # Refunds the amount back to sender in case of any failure during transfer
+                    logger.error(f"Transfer failed: {username} -> {recepient_name} | Reason: {e}")
+
+            elif choice == '4':
                 account.print_statement()
 
-            elif choice == "4":
+            elif choice == "5":
                 print(f"Logging out {username}...")
                 logger.info(f"Ending session for {username}")
                 break
