@@ -1,66 +1,79 @@
-import pytest
 import os
+import pytest
 from src.bank_account import BankAccount
 
-TEST_FILE = 'data/test_transactions.json'
+TEST_USER = "pytestdummyuser"
+# Your code strips non-alphanumeric, so we match that logic for the file path
+TEST_FILE_PATH = f"data/{TEST_USER}_transactions.json"
 
+def setup_function():
+    """Runs BEFORE every test. Destroys old test data."""
+    if os.path.exists(TEST_FILE_PATH):
+        os.remove(TEST_FILE_PATH)
 
-@pytest.fixture(autouse=True)
-def clean_up_file():
-    """ Runs before and after each test"""
-    file_name = TEST_FILE
-    # Before test: Clear the file
-    if os.path.exists(file_name):
-        os.remove(file_name)
+def teardown_function():
+    """Runs AFTER every test. Cleans up the mess."""
+    if os.path.exists(TEST_FILE_PATH):
+        os.remove(TEST_FILE_PATH)
 
-    yield # run the tests
+def test_initial_balance_is_zero():
+    # 1. ARRANGE (Because of setup_function, we know no file exists)
+    account = BankAccount(username=TEST_USER)
+    
+    # 2. ACT
+    current_balance = account.get_balance()
+    
+    # 3. ASSERT
+    assert current_balance == 0.0, f"Expected 0.0, got {current_balance}"
 
-    # After test: Clear the file
-    # if os.path.exists(file_name):
-    #     os.remove(file_name)
+def test_deposit_increases_balance():
+    account = BankAccount(username=TEST_USER)
 
-@pytest.fixture
-def create_account():
+    account.deposit(100.0)
+    current_balance = account.get_balance()
 
-    def _maker(initial_balance):
-        return BankAccount(initial_balance, file_path=TEST_FILE)
-    return _maker
+    assert current_balance == 100.0, f"Expected 100.0, got {current_balance}"
 
+def test_withdraw_decreases_balance():
+    account = BankAccount(username=TEST_USER)
 
+    account.deposit(200.0)
 
-def test_initial_balance(create_account):
-    account = create_account(350)
-    assert account.get_balance() == 350
+    account.withdraw(50.0)
+    current_balance = account.get_balance()
 
-def test_deposit(create_account):
-    account = create_account(50)
-    account.deposit(100)
-    assert account.get_balance() == 150
+    assert current_balance == 150.0, f"Expected 150.0, got {current_balance}"
 
-def test_withdraw(create_account):
-    account = create_account(500)
-    account.withdraw(57)
-    assert account.get_balance() == 443
+def test_withdraw_insufficient_funds():
+    account = BankAccount(username=TEST_USER)
 
-def test_deposit_negative_amount_error(create_account):
-    account = create_account(125)
+    account.deposit(50.0)
 
-    with pytest.raises(ValueError):
-        account.deposit(-20)
+    with pytest.raises(ValueError, match="Insufficient Funds"):
+        account.withdraw(200.0)
 
-def test_withdraw_negative_amount_error(create_account):
-    account = create_account(1000)
+def test_receive_transfer_increases_balance():
+    account = BankAccount(username=TEST_USER)
 
-    with pytest.raises(ValueError):
-        account.withdraw(-1500)
+    account.receive_transfer(100.0, sender="TestSender")
+    current_balance = account.get_balance()
 
-def test_withdraw_insufficient_funds_error(create_account):
-    account = create_account(250)
+    assert current_balance == 100.0, f"Expected 100.0, got {current_balance}"
 
-    with pytest.raises(ValueError):
-        account.withdraw(300)
+def test_negative_deposit_raises_error():
+    account = BankAccount(username=TEST_USER)
 
-def test_initial_balance_negative_error():
+    with pytest.raises(ValueError, match="Deposit amount must be Positive"):
+        account.deposit(-50.0)
 
-    with pytest.raises(ValueError):
-        BankAccount(-100)
+def test_negative_wihdrawl_raises_error():
+    account = BankAccount(username=TEST_USER)
+
+    with pytest.raises(ValueError, match="Withdraw amount must be Positive"):
+        account.withdraw(-30.0)
+
+def test_receive_transfer_negative_amount_raises_error():
+    account = BankAccount(username=TEST_USER)
+
+    with pytest.raises(ValueError, match="Transfer amount must be positive."):
+        account.receive_transfer(-20.0, sender="TestSender")
