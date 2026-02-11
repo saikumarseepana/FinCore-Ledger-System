@@ -26,10 +26,10 @@ logging.basicConfig(
 
 # print(f"System Initialized. Logs are writing to: {log_file}")
 logger = logging.getLogger("MainApp")
-logger.info(f"System Initialized. Logs are writing to: " + log_file)
+logger.info(f"System Initialized. Logs are writing to: {log_file}")
 
 def main():
-    print("\n=== 🏦 FinCore Ledger System (Secure v1.0) ===")
+    print("\n=== FinCore Ledger System (Secure v1.0) ===")
 
     user_manager = UserManager()
 
@@ -56,7 +56,7 @@ def main():
             new_pass = input("Enter a Password: ").strip()
 
             if not new_user or not new_pass:
-                print("❌ Error: Username/Password cannot be empty.")
+                print("Error: Username/Password cannot be empty.")
                 continue
             
             success, message = user_manager.register_user(new_user, new_pass)
@@ -75,7 +75,7 @@ def run_bank_system(username, user_manager):
 
     
     try:
-        # Intitializing the account for this user
+        # Initializing the account for this user
         account = BankAccount(username=username)
     except ValueError as e:
         print(f"Error loading account: {e}")
@@ -83,7 +83,7 @@ def run_bank_system(username, user_manager):
 
     while True:
 
-        print(f"\n💰 User: {username} | Balance: ${account.get_balance():.2f}")
+        print(f"\n User: {username} | Balance: ${account.get_balance():.2f}")
         print("1. Deposit")
         print("2. Withdraw")
         print("3. Transfer Funds")
@@ -104,14 +104,14 @@ def run_bank_system(username, user_manager):
                 print(f"Withdrew: {amount}")
 
             elif choice == '3':
-                recepient_name = input("Enter recepient username: ").strip()
+                recipient_name = input("Enter recipient username: ").strip()
 
-                if recepient_name == username: # Self transfer check
+                if recipient_name == username: # Self transfer check
                     print("You cannot self transfer funds")
                     continue
 
-                if recepient_name not in user_manager.users: # Recepient existence check
-                    print("Recepient not found")
+                if recipient_name not in user_manager.users: # Recipient existence check
+                    print("Recipient not found")
                     continue
 
                 amount = float(input("Enter transfer amount: "))
@@ -125,21 +125,20 @@ def run_bank_system(username, user_manager):
                 try:
                     account.withdraw(amount) # withdraw from sender
 
-                    print(f"DEBUG: Withdrew ${amount} from {username}. Waiting to send...")
 
-                    # Loads the recepient's account and deposits the amount
-                    recepient_account = BankAccount(username=recepient_name)
-                    recepient_account.receive_transfer(amount, sender=username)
+                    # Loads the recipient's account and deposits the amount
+                    recipient_account = BankAccount(username=recipient_name)
+                    recipient_account.receive_transfer(amount, sender=username)
 
-                    print(f"✅ Success! Sent ${amount} to {recepient_name}.")
-                    logger.info(f"Transfer success: {username} -> {recepient_name} | Amount: ${amount}")
+                    print(f"✅ Success! Sent ${amount} to {recipient_name}.")
+                    logger.info(f"Transfer success: {username} -> {recipient_name} | Amount: ${amount}")
 
                 except Exception as e:
                     print(f"Transfer failed: {e}")
                     print("Rolling back transaction...")
 
                     account.deposit(amount) # Refunds the amount back to sender in case of any failure during transfer
-                    logger.error(f"Transfer failed: {username} -> {recepient_name} | Reason: {e}")
+                    logger.error(f"Transfer failed: {username} -> {recipient_name} | Reason: {e}")
 
             elif choice == '4':
                 account.print_statement()
